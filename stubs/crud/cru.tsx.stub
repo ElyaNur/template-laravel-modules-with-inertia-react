@@ -1,0 +1,90 @@
+import { Link, useForm, usePage } from '@inertiajs/react';
+import { SharedData, {{ resource_name_pascal }}Data } from '@/types';
+import { CardContent, CardFooter } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import {{ resource_name_pascal }}Controller from '@/actions/Modules/{{ module_name_pascal }}/Http/Controllers/{{ resource_name_pascal }}Controller';
+
+const Cru = ({ {{ resource_name_camel }} }: { {{ resource_name_camel }}?: {{ resource_name_pascal }}Data }) => {
+    const { type } = usePage<SharedData>().props;
+
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        name: {{ resource_name_camel }}?.name || '',
+        // Add other fields from your resource here
+    });
+
+    const handleSubmit = (createAnother: boolean = false) => {
+        const options = {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => {
+                if (type === 'create') {
+                    reset();
+                }
+            },
+        };
+
+        if (type === 'edit') {
+            if (!{{ resource_name_camel }}) return;
+            put({{ resource_name_pascal }}Controller.update.url({ id: {{ resource_name_camel }}.id }), options);
+            return;
+        }
+
+        post({{ resource_name_pascal }}Controller.store.url({ query: { create_another: createAnother } }), options);
+    };
+
+    return (
+        <form>
+            <CardContent>
+                <div className="grid gap-4 lg:grid-cols-2">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                            id="name"
+                            type="text"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                            disabled={type === 'show'}
+                        />
+                        <InputError message={errors.name} className="mt-2" />
+                    </div>
+                    {/* Add other form fields here */}
+                </div>
+            </CardContent>
+            <CardFooter>
+                <div className="flex gap-2">
+                    <Button
+                        type="button"
+                        onClick={() => {
+                            if (type !== 'show') {
+                                handleSubmit(false);
+                                return;
+                            }
+                            if ({{ resource_name_camel }}?.id) {
+                                router.get({{ resource_name_pascal }}Controller.edit.url({ id: {{ resource_name_camel }}.id }));
+                            }
+                        }}
+                        disabled={processing}
+                    >
+                        {type === 'edit' && 'Update'}
+                        {type === 'create' && 'Simpan'}
+                        {type === 'show' && 'Edit'}
+                    </Button>
+                    {type === 'create' && (
+                        <Button type="button" variant="outline" onClick={() => handleSubmit(true)} disabled={processing}>
+                            Simpan & Buat Lainnya
+                        </Button>
+                    )}
+                    <Button type="button" variant="secondary" disabled={processing} asChild>
+                        <Link href={{{ resource_name_pascal }}Controller.index().url}>{type === 'show' ? 'Kembali' : 'Batal'}</Link>
+                    </Button>
+                </div>
+            </CardFooter>
+        </form>
+    );
+};
+
+export default Cru;

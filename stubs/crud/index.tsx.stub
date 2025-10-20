@@ -1,0 +1,49 @@
+import type { ReactNode } from 'react';
+import AppLayout from '@/layouts/app-layout';
+import { BreadcrumbItem, SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/data-table/data-table';
+import { {{ resource_name_pascal }}Data } from '@/types';
+import { use{{ resource_name_pascal }}Table } from './hooks/use-{{ resource_name_kebab }}-table';
+import { columns } from './columns';
+import {{ resource_name_pascal }}Controller from '@/actions/Modules/{{ module_name_pascal }}/Http/Controllers/{{ resource_name_pascal }}Controller';
+
+const Index = () => {
+    const { {{ resource_name_plural_camel }} } = usePage<SharedData>().props;
+    const hooks = use{{ resource_name_pascal }}Table({ data: {{ resource_name_plural_camel }} });
+
+    return (
+        <>
+            <Head title='{{ resource_name_pascal }}' />
+            <Card>
+                <CardHeader className='flex flex-row justify-between'>
+                    <div className='flex flex-col'>
+                        <CardTitle>{{ resource_name_pascal }}</CardTitle>
+                        <CardDescription>Manajemen data {{ resource_name_plural_lowercase }}</CardDescription>
+                    </div>
+                    <Button asChild>
+                        <Link href={ {{ resource_name_pascal }}Controller.create().url }>Tambah {{ resource_name_pascal }}</Link>
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <DataTable<{{ resource_name_pascal }}Data> columns={columns} hooks={hooks} />
+                </CardContent>
+            </Card>
+        </>
+    );
+};
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: '{{ module_name_pascal }}',
+    },
+    {
+        title: '{{ resource_name_pascal }}',
+    }
+];
+
+Index.layout = (page: ReactNode) => <AppLayout children={page} breadcrumbs={breadcrumbs} />;
+
+export default Index;

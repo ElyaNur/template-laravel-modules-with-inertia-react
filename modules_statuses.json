@@ -1,0 +1,8 @@
+{
+    "Blog": true,
+    "Auth": true,
+    "UserManagement": true,
+    "Settings": true,
+    "Dashboard": true,
+    "Master": true
+}

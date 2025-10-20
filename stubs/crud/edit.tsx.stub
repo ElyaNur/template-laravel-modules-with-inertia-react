@@ -1,0 +1,41 @@
+import type { ReactNode } from 'react';
+import { BreadcrumbItem, SharedData } from '@/types';
+import AppLayout from '@/layouts/app-layout';
+import { Head, usePage } from '@inertiajs/react';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Cru from './cru';
+import {{ resource_name_pascal }}Controller from '@/actions/Modules/{{ module_name_pascal }}/Http/Controllers/{{ resource_name_pascal }}Controller';
+
+const Edit = () => {
+    const { {{ resource_name_camel }} } = usePage<SharedData>().props;
+
+    return (
+        <>
+            <Head title='{{ resource_name_pascal }} Edit' />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Edit {{ resource_name_pascal }}</CardTitle>
+                    <CardDescription>Edit data {{ resource_name_plural_lowercase }}</CardDescription>
+                </CardHeader>
+                <Cru {{ resource_name_camel }}={ {{ resource_name_camel }} } />
+            </Card>
+        </>
+    );
+};
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: '{{ module_name_pascal }}',
+    },
+    {
+        title: '{{ resource_name_pascal }}',
+        href: {{ resource_name_pascal }}Controller.index().url
+    },
+    {
+        title: 'Edit',
+    }
+];
+
+Edit.layout = (page: ReactNode) => <AppLayout children={page} breadcrumbs={breadcrumbs} />;
+
+export default Edit;

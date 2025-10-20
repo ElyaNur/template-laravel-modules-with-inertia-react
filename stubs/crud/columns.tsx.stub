@@ -1,0 +1,35 @@
+'use client';
+
+import { ColumnDef } from '@tanstack/react-table';
+import { {{ resource_name_pascal }}Data } from '@/types';
+import { Checkbox } from '@/components/ui/checkbox';
+import ActionColumn from '@/components/data-table/data-table-action-column';
+import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header';
+
+export const columns: ColumnDef<{{ resource_name_pascal }}Data>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label='Select all'
+            />
+        ),
+        cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label='Select row' />,
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
+        accessorKey: 'name',
+        header: ({ column }) => <DataTableColumnHeader column={column} title='NAME' />,
+    },
+    // Add other columns here
+    {
+        id: 'actions',
+        header: 'ACTIONS',
+        cell: ({ row }) => <ActionColumn route='{{ module_name_kebab }}.{{ resource_name_plural_kebab }}' id={row.original.id} isTrashed={row.original.deleted_at !== null} />,
+        enableSorting: false,
+        enableHiding: false,
+    },
+];

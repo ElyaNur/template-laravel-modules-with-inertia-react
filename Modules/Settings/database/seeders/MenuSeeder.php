@@ -1,0 +1,128 @@
+<?php
+
+namespace Modules\Settings\Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class MenuSeeder extends Seeder
+{
+    public function run(): void
+    {
+        \DB::table('menu')->delete();
+
+        \DB::table('menu')->insert([
+            0 => [
+                'id' => 3,
+                'parent_id' => null,
+                'nama' => 'dashboard',
+                'keterangan' => 'Menu dashboard',
+                'sort' => 1,
+                'icon' => 'layout-dashboard',
+                'is_active' => true,
+                'permissions' => '["dashboard:view-any"]',
+                'models' => '[]',
+                'created_at' => '2024-11-28 08:39:58',
+                'updated_at' => '2024-11-28 08:42:37',
+                'deleted_at' => '2024-11-28 08:42:37',
+            ],
+            1 => [
+                'id' => 4,
+                'parent_id' => null,
+                'nama' => 'dashboard',
+                'keterangan' => 'Menu Dashboard',
+                'sort' => 1,
+                'icon' => 'layout-dashboard',
+                'is_active' => true,
+                'permissions' => '["dashboard:view-any"]',
+                'models' => '[]',
+                'created_at' => '2024-11-28 08:42:58',
+                'updated_at' => '2024-11-28 08:43:04',
+                'deleted_at' => '2024-11-28 08:43:04',
+            ],
+            2 => [
+                'id' => 19,
+                'parent_id' => 9,
+                'nama' => 'menu',
+                'keterangan' => 'Menu untuk mengatur menu untuk aplikasi',
+                'sort' => 1,
+                'icon' => null,
+                'is_active' => true,
+                'permissions' => '[]',
+                'models' => '["Modules\\\\Settings\\\\Menu"]',
+                'created_at' => '2024-11-29 14:52:02',
+                'updated_at' => '2024-11-29 15:51:40',
+                'deleted_at' => null,
+            ],
+            3 => [
+                'id' => 9,
+                'parent_id' => null,
+                'nama' => 'settings',
+                'keterangan' => 'Menu pengaturan sistem',
+                'sort' => 3,
+                'icon' => 'settings',
+                'is_active' => true,
+                'permissions' => '["settings:view-any"]',
+                'models' => '[]',
+                'created_at' => '2024-11-28 08:52:50',
+                'updated_at' => '2024-11-28 11:57:54',
+                'deleted_at' => null,
+            ],
+            4 => [
+                'id' => 8,
+                'parent_id' => null,
+                'nama' => 'whatsapp device',
+                'keterangan' => 'Menu untuk user mengintegrasikan whatsapp di perngkat dengan di web service',
+                'sort' => 2,
+                'icon' => 'message-circle',
+                'is_active' => true,
+                'permissions' => '["whatsapp-device:view-any"]',
+                'models' => '[]',
+                'created_at' => '2024-11-28 08:52:20',
+                'updated_at' => '2024-11-28 14:23:22',
+                'deleted_at' => '2024-11-28 14:23:22',
+            ],
+            5 => [
+                'id' => 7,
+                'parent_id' => null,
+                'nama' => 'dashboard',
+                'keterangan' => 'Menu dashboard',
+                'sort' => 1,
+                'icon' => 'layout-dashboard',
+                'is_active' => true,
+                'permissions' => '["dashboard:view-any"]',
+                'models' => '[]',
+                'created_at' => '2024-11-28 08:51:38',
+                'updated_at' => '2024-12-01 00:09:43',
+                'deleted_at' => null,
+            ],
+            6 => [
+                'id' => 28,
+                'parent_id' => 9,
+                'nama' => 'role',
+                'keterangan' => 'Menu untuk setting role di aplikasi',
+                'sort' => 3,
+                'icon' => null,
+                'is_active' => true,
+                'permissions' => '[]',
+                'models' => '["Modules\\\\Settings\\\\Role"]',
+                'created_at' => '2024-12-06 02:46:16',
+                'updated_at' => '2024-12-06 02:46:16',
+                'deleted_at' => null,
+            ],
+            7 => [
+                'id' => 27,
+                'parent_id' => 9,
+                'nama' => 'user',
+                'keterangan' => 'Menu untuk setting user',
+                'sort' => 2,
+                'icon' => null,
+                'is_active' => true,
+                'permissions' => '[]',
+                'models' => '["Modules\\\\Settings\\\\User"]',
+                'created_at' => '2024-12-05 07:21:41',
+                'updated_at' => '2024-12-06 03:36:56',
+                'deleted_at' => null,
+            ],
+        ]);
+    }
+}

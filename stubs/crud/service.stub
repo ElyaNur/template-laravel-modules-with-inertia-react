@@ -1,0 +1,10 @@
+<?php
+
+namespace Modules\{{ module_name_pascal }}\app\Services;
+
+use App\Services\Service;
+
+class {{ resource_name_pascal }}Service extends Service
+{
+    // Business logic for {{ resource_name_pascal }} resource
+}
