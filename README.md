@@ -1,5 +1,8 @@
 # Laravel Modules with Inertia.js (React & TypeScript) Template
 
+[![Tests](https://github.com/ElyaNur/template-laravel-modules-with-inertia-react/actions/workflows/tests.yml/badge.svg)](https://github.com/ElyaNur/template-laravel-modules-with-inertia-react/actions/workflows/tests.yml)
+[![Lint](https://github.com/ElyaNur/template-laravel-modules-with-inertia-react/actions/workflows/lint.yml/badge.svg)](https://github.com/ElyaNur/template-laravel-modules-with-inertia-react/actions/workflows/lint.yml)
+
 Ini adalah sebuah template proyek yang dibangun di atas Laravel, menggunakan paket `nwidart/laravel-modules` untuk struktur aplikasi modular, dan diintegrasikan dengan `Inertia.js` untuk membangun antarmuka pengguna (UI) modern dengan React dan TypeScript.
 
 ## Latar Belakang
@@ -24,8 +27,8 @@ Berikut adalah langkah-langkah untuk menjalankan proyek ini di lingkungan lokal 
 
 1.  **Clone Repositori**
     ```bash
-    git clone https://github.com/your-username/your-repository.git
-    cd your-repository
+    git clone https://github.com/your-username/template-laravel-modules-with-inertia-react.git
+    cd template-laravel-modules-with-inertia-react
     ```
 
 2.  **Install Dependensi PHP**

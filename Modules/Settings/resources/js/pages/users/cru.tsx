@@ -35,7 +35,7 @@ const Cru = ({ user }: { user?: UserData }) => {
             ...previousData,
             roles: selectedRoles.map((role) => parseInt(role)),
         }));
-    }, [selectedRoles]);
+    }, [selectedRoles, setData]);
 
     const handleSubmit = (createAnother: boolean = false) => {
         if (!user) return;

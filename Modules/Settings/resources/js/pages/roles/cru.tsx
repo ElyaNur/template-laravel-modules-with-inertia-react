@@ -139,7 +139,7 @@ const Permissions = () => {
         [listMenuWithPermission],
     );
 
-    const isSelectAll = useMemo(() => getPermissions.every((value) => data.permissions.includes(value)), [data.permissions]);
+    const isSelectAll = useMemo(() => getPermissions.every((value) => data.permissions.includes(value)), [data.permissions, getPermissions]);
 
     const handleSelectAllToggle = () => {
         if (isSelectAll) {
@@ -194,7 +194,7 @@ const ListMenuWithPermissions = ({ menuWithPermission: menu }: { menuWithPermiss
         [menu],
     );
 
-    const isSelectAll = useMemo(() => getPermissions.every((value) => data.permissions.includes(value)), [data.permissions]);
+    const isSelectAll = useMemo(() => getPermissions.every((value) => data.permissions.includes(value)), [data.permissions, getPermissions]);
 
     const handleSelectAllToggle = () => {
         if (isSelectAll) {
@@ -255,7 +255,7 @@ const PermissionsOnMenuComponent = ({ permissionsOnMenu: permission }: { permiss
 
     const isSelectAll = useMemo(
         () => permission.listPermission.map((data) => data.value).every((value) => data.permissions.includes(value)),
-        [data.permissions],
+        [data.permissions, permission.listPermission],
     );
 
     const handleSelectAllToggle = () => {

@@ -1,4 +1,4 @@
-type LoaderMap = Record<string, () => Promise<any>>;
+type LoaderMap = Record<string, () => Promise<Record<string, unknown>>>;
 
 const pages: LoaderMap = {
     ...import.meta.glob('./Pages/**/*.tsx'),

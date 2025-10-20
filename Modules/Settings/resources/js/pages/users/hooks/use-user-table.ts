@@ -39,7 +39,7 @@ export const useUserTable = ({ data }: { data: PaginatedResponse<UserData> }) =>
                 onFinish: () => setIsLoading(false),
             },
         );
-    }, [globalFilter, sorting, withTrashed]);
+    }, [globalFilter, sorting, withTrashed, query]);
 
     useEffect(() => {
         if (query.withTrashed) {

@@ -1,7 +1,7 @@
 import { login } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import {index as dashboard} from '@/routes/dashboard'
+
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;

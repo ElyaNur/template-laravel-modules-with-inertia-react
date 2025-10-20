@@ -10,7 +10,7 @@ import { columns } from './columns';
 import { useMenuTable } from './hooks/use-menu-table';
 
 const Menus = () => {
-    const { menus, toast } = usePage<SharedData>().props;
+    const { menus } = usePage<SharedData>().props;
     const hooks = useMenuTable({ data: menus });
 
     return (

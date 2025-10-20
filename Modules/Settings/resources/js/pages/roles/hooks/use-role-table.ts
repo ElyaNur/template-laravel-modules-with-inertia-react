@@ -37,7 +37,7 @@ export const useRoleTable = ({ data }: { data: PaginatedResponse<RoleData> }) =>
                 onFinish: () => setIsLoading(false),
             },
         );
-    }, [globalFilter, sorting]);
+    }, [globalFilter, sorting, query]);
 
     const getSortString = (sorting: { id: string; desc: boolean }[]) => {
         return sorting.map((sort) => `${sort.id}:${sort.desc ? 'desc' : 'asc'}`).join(',');
