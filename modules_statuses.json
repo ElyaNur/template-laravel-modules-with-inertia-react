@@ -4,5 +4,6 @@
     "UserManagement": true,
     "Settings": true,
     "Dashboard": true,
-    "Master": true
+    "Master": true,
+    "TaskManagement": true
 }

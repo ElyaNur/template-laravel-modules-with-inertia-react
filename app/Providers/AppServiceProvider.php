@@ -26,5 +26,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user) {
             return $user->hasRole('super admin') ? true : null;
         });
+
+        // Register Task policy
+        Gate::policy(\Modules\TaskManagement\Models\Task::class, \Modules\TaskManagement\Policies\TaskPolicy::class);
     }
 }
