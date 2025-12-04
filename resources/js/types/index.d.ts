@@ -55,6 +55,13 @@ export interface SharedData {
     listMenuWithPermission: MenuWithPermission[];
 
     toast: Toast;
+
+    // Task Management Module
+    tasks: PaginatedResponse<TaskData>;
+    task: TaskData;
+    statuses: TaskStatusData[];
+    kanbanData: KanbanStatusData[];
+    filters: TaskFilters;
 }
 
 export type ListData = {
@@ -181,3 +188,97 @@ export interface AgamaData {
     created_at: string;
     updated_at: string;
 }
+
+// ==================== Task Management Types ====================
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export type TaskStatusData = {
+    id: number;
+    name: string;
+    slug: string;
+    color: string;
+    sort: number;
+    is_default: boolean;
+    is_completed: boolean;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type TaskData = {
+    id: number;
+    title: string;
+    description?: string;
+    task_status_id: number;
+    status: TaskStatusData;
+    priority: TaskPriority;
+    priority_color: string;
+    deadline?: string;
+    completed_at?: string;
+    created_by: number;
+    creator: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    assigned_users: Array<{
+        id: number;
+        name: string;
+        email: string;
+    }>;
+    sort: number;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+};
+
+export type KanbanTaskData = {
+    id: number;
+    title: string;
+    description?: string;
+    priority: TaskPriority;
+    priority_color: string;
+    deadline?: string;
+    is_overdue: boolean;
+    assigned_users: Array<{
+        id: number;
+        name: string;
+        email: string;
+    }>;
+    sort: number;
+};
+
+export type KanbanStatusData = {
+    id: number;
+    name: string;
+    slug: string;
+    color: string;
+    is_completed: boolean;
+    tasks: KanbanTaskData[];
+};
+
+export type TaskFilters = {
+    status?: number;
+    priority?: TaskPriority;
+    assigned_to?: number;
+    search?: string;
+    overdue?: boolean;
+};
+
+export type PermissionData = {
+    id: number;
+    name: string;
+    guard_name: string;
+};
+
+export type PermissionOrModel = {
+    value: string;
+    label: string;
+};
+
+export type PaginatedMetadata = {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+};

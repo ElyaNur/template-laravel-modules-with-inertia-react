@@ -7,40 +7,37 @@ use Modules\TaskManagement\Models\TaskStatus;
 
 class TaskStatusSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $statuses = [
             [
-                'name' => 'To Do',
                 'slug' => 'to-do',
-                'color' => '#94a3b8', // gray
+                'name' => 'To Do',
+                'color' => '#94a3b8',
                 'sort' => 1,
                 'is_default' => true,
                 'is_completed' => false,
             ],
             [
-                'name' => 'In Progress',
                 'slug' => 'in-progress',
-                'color' => '#3b82f6', // blue
+                'name' => 'In Progress',
+                'color' => '#3b82f6',
                 'sort' => 2,
                 'is_default' => false,
                 'is_completed' => false,
             ],
             [
-                'name' => 'In Review',
                 'slug' => 'in-review',
-                'color' => '#f59e0b', // orange
+                'name' => 'In Review',
+                'color' => '#f59e0b',
                 'sort' => 3,
                 'is_default' => false,
                 'is_completed' => false,
             ],
             [
-                'name' => 'Done',
                 'slug' => 'done',
-                'color' => '#22c55e', // green
+                'name' => 'Done',
+                'color' => '#10b981',
                 'sort' => 4,
                 'is_default' => false,
                 'is_completed' => true,
@@ -48,7 +45,12 @@ class TaskStatusSeeder extends Seeder
         ];
 
         foreach ($statuses as $status) {
-            TaskStatus::create($status);
+            TaskStatus::updateOrCreate(
+                ['slug' => $status['slug']],
+                $status
+            );
         }
+
+        $this->command->info('✓ Task statuses created/updated successfully!');
     }
 }

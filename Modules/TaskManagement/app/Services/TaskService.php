@@ -2,6 +2,8 @@
 
 namespace Modules\TaskManagement\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\TaskManagement\Models\Task;
@@ -41,10 +43,21 @@ class TaskService
     /**
      * Get tasks for data table with filtering.
      */
-    public function getTasksForDataTable(array $filters = []): Collection
+    public function getTasksForDataTable(array $filters = []): LengthAwarePaginator
     {
         $query = Task::with(['status', 'creator', 'assignedUsers']);
 
+        // Handle soft deletes
+        if (isset($filters['withTrashed'])) {
+            if ($filters['withTrashed'] === 'only-trashed') {
+                $query->onlyTrashed();
+            } elseif ($filters['withTrashed'] === 'with-trashed') {
+                $query->withTrashed();
+            }
+            // Default is without trashed
+        }
+
+        // Apply filters
         if (isset($filters['status'])) {
             $query->status($filters['status']);
         }
@@ -57,10 +70,10 @@ class TaskService
             $query->assignedTo($filters['assigned_to']);
         }
 
-        if (isset($filters['search'])) {
+        if (isset($filters['filter']) && !empty($filters['filter'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+                $q->where('title', 'like', '%' . $filters['filter'] . '%')
+                    ->orWhere('description', 'like', '%' . $filters['filter'] . '%');
             });
         }
 
@@ -68,7 +81,36 @@ class TaskService
             $query->overdue();
         }
 
-        return $query->latest()->get();
+        // Apply sorting
+        if (isset($filters['sort']) && !empty($filters['sort'])) {
+            // Column mapping for sortable fields
+            $columnMap = [
+                'status' => 'task_status_id',
+                'created_by' => 'created_by',
+                'title' => 'title',
+                'priority' => 'priority',
+                'deadline' => 'deadline',
+                'created_at' => 'created_at',
+                'updated_at' => 'updated_at',
+            ];
+
+            $sorts = explode(',', $filters['sort']);
+            foreach ($sorts as $sort) {
+                [$column, $direction] = explode(':', $sort);
+                
+                // Map frontend column to database column
+                $dbColumn = $columnMap[$column] ?? $column;
+                
+                // Only allow whitelisted columns
+                if (isset($columnMap[$column])) {
+                    $query->orderBy($dbColumn, $direction);
+                }
+            }
+        } else {
+            $query->latest();
+        }
+
+        return $query->paginate(15);
     }
 
     /**
@@ -130,18 +172,55 @@ class TaskService
      */
     public function updateTaskStatus(Task $task, int $statusId, int $sort): Task
     {
-        $task->update([
-            'task_status_id' => $statusId,
-            'sort' => $sort,
-        ]);
+        $oldStatusId = $task->task_status_id;
+        $oldSort = $task->sort;
+        
+        return DB::transaction(function () use ($task, $statusId, $sort, $oldStatusId, $oldSort) {
+            // Moving to a different column
+            if ($oldStatusId !== $statusId) {
+                // 1. In SOURCE column: Shift down tasks that were after the removed task
+                Task::where('task_status_id', $oldStatusId)
+                    ->where('sort', '>', $oldSort)
+                    ->decrement('sort');
 
-        // Mark as completed if moving to completed status
-        $status = TaskStatus::find($statusId);
-        if ($status && $status->is_completed && !$task->completed_at) {
-            $task->markAsCompleted();
-        }
+                // 2. In TARGET column: Shift up tasks at and after the insertion position
+                Task::where('task_status_id', $statusId)
+                    ->where('sort', '>=', $sort)
+                    ->increment('sort');
 
-        return $task->fresh(['status', 'creator', 'assignedUsers']);
+                // 3. Update the task with new status and position
+                $task->update([
+                    'task_status_id' => $statusId,
+                    'sort' => $sort,
+                ]);
+            } else {
+                // Reordering within the same column
+                if ($sort > $oldSort) {
+                    // Moving down: shift tasks between old and new position up
+                    Task::where('task_status_id', $statusId)
+                        ->where('sort', '>', $oldSort)
+                        ->where('sort', '<=', $sort)
+                        ->decrement('sort');
+                } else if ($sort < $oldSort) {
+                    // Moving up: shift tasks between new and old position down
+                    Task::where('task_status_id', $statusId)
+                        ->where('sort', '>=', $sort)
+                        ->where('sort', '<', $oldSort)
+                        ->increment('sort');
+                }
+
+                // Update the task position
+                $task->update(['sort' => $sort]);
+            }
+
+            // Mark as completed if moving to completed status
+            $status = TaskStatus::find($statusId);
+            if ($status && $status->is_completed && !$task->completed_at) {
+                $task->markAsCompleted();
+            }
+
+            return $task->fresh(['status', 'creator', 'assignedUsers']);
+        });
     }
 
     /**

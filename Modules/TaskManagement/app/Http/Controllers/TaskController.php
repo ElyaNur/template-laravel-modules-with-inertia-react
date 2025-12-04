@@ -27,10 +27,10 @@ class TaskController extends Controller
     {
         $this->authorize('viewAny', Task::class);
 
-        $filters = $request->only(['status', 'priority', 'assigned_to', 'search', 'overdue']);
+        $filters = $request->only(['status', 'priority', 'assigned_to', 'filter', 'overdue', 'sort', 'withTrashed']);
         $tasks = $this->taskService->getTasksForDataTable($filters);
 
-        return Inertia::render('TaskManagement::index', [
+        return Inertia::render('TaskManagement::tasks/index', [
             'tasks' => $tasks,
             'statuses' => TaskStatus::sorted()->get(),
             'users' => User::select('id', 'name', 'email')->get(),
@@ -55,7 +55,7 @@ class TaskController extends Controller
             $filters['priority']
         );
 
-        return Inertia::render('TaskManagement::kanban', [
+        return Inertia::render('TaskManagement::tasks/kanban', [
             'kanbanData' => $kanbanData,
             'users' => User::select('id', 'name', 'email')->get(),
             'filters' => $filters,
@@ -69,7 +69,7 @@ class TaskController extends Controller
     {
         $this->authorize('create', Task::class);
 
-        return Inertia::render('TaskManagement::create', [
+        return Inertia::render('TaskManagement::tasks/create', [
             'statuses' => TaskStatus::sorted()->get(),
             'users' => User::select('id', 'name', 'email')->get(),
         ]);
@@ -90,9 +90,15 @@ class TaskController extends Controller
 
         $task = $this->taskService->createTask($data);
 
-        return redirect()->route('tasks.index')
+        // Check for explicit return parameter (e.g., from Kanban ?return=kanban)
+        $returnRoute = match($request->query('return')) {
+            'kanban' => 'task-management.kanban-board.index',
+            default => 'task-management.all-tasks.index',
+        };
+
+        return redirect()->route($returnRoute)
             ->with('toast', [
-                'type' => 'success',
+                'success' => true,
                 'message' => 'Task created successfully.',
             ]);
     }
@@ -106,7 +112,7 @@ class TaskController extends Controller
 
         $task->load(['status', 'creator', 'assignedUsers']);
 
-        return Inertia::render('TaskManagement::show', [
+        return Inertia::render('TaskManagement::tasks/show', [
             'task' => $task,
         ]);
     }
@@ -120,7 +126,7 @@ class TaskController extends Controller
 
         $task->load(['status', 'creator', 'assignedUsers']);
 
-        return Inertia::render('TaskManagement::edit', [
+        return Inertia::render('TaskManagement::tasks/edit', [
             'task' => $task,
             'statuses' => TaskStatus::sorted()->get(),
             'users' => User::select('id', 'name', 'email')->get(),
@@ -137,9 +143,9 @@ class TaskController extends Controller
         $data = $request->validated();
         $this->taskService->updateTask($task, $data);
 
-        return redirect()->route('tasks.index')
+        return redirect()->back()
             ->with('toast', [
-                'type' => 'success',
+                'success' => true,
                 'message' => 'Task updated successfully.',
             ]);
     }
@@ -155,7 +161,7 @@ class TaskController extends Controller
 
         return redirect()->back()
             ->with('toast', [
-                'type' => 'success',
+                'success' => true,
                 'message' => 'Task deleted successfully.',
             ]);
     }
@@ -178,9 +184,9 @@ class TaskController extends Controller
             $validated['sort']
         );
 
-        return response()->json([
+        return redirect()->back()->with('toast', [
             'success' => true,
-            'task' => $updatedTask,
+            'message' => 'Task status updated successfully.',
         ]);
     }
 
@@ -195,7 +201,7 @@ class TaskController extends Controller
 
         return redirect()->back()
             ->with('toast', [
-                'type' => 'success',
+                'success' => true,
                 'message' => 'Task marked as completed.',
             ]);
     }

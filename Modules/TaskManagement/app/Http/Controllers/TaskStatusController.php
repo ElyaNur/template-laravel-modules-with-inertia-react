@@ -5,6 +5,7 @@ namespace Modules\TaskManagement\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Modules\TaskManagement\Http\Requests\TaskStatusRequest;
 use Modules\TaskManagement\Models\TaskStatus;
 
@@ -17,10 +18,24 @@ class TaskStatusController extends Controller
      */
     public function index()
     {
-        $statuses = TaskStatus::sorted()->withCount('tasks')->get();
+        $this->authorize('viewAny', TaskStatus::class);
 
-        return response()->json([
+        $statuses = TaskStatus::sorted()->withCount('tasks')->paginate(15);
+
+        return Inertia::render('TaskManagement::statuses/index', [
             'statuses' => $statuses,
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new task status.
+     */
+    public function create()
+    {
+        $this->authorize('create', TaskStatus::class);
+
+        return Inertia::render('TaskManagement::statuses/create', [
+            'nextSort' => TaskStatus::max('sort') + 1,
         ]);
     }
 
@@ -29,6 +44,8 @@ class TaskStatusController extends Controller
      */
     public function store(TaskStatusRequest $request)
     {
+        $this->authorize('create', TaskStatus::class);
+
         $data = $request->validated();
 
         // Auto-generate sort number if not provided
@@ -41,12 +58,30 @@ class TaskStatusController extends Controller
             TaskStatus::where('is_default', true)->update(['is_default' => false]);
         }
 
-        $status = TaskStatus::create($data);
+        TaskStatus::create($data);
 
-        return response()->json([
-            'success' => true,
-            'status' => $status,
-            'message' => 'Status created successfully.',
+        // Check for explicit return parameter (e.g., from Kanban ?return=kanban)
+        $returnRoute = match($request->query('return')) {
+            'kanban' => 'task-management.kanban-board.index',
+            default => 'task-management.task-statuses.index',
+        };
+
+        return redirect()->route($returnRoute)
+            ->with('toast', [
+                'success' => true,
+                'message' => 'Status created successfully.',
+            ]);
+    }
+
+    /**
+     * Show the form for editing the specified task status.
+     */
+    public function edit(TaskStatus $taskStatus)
+    {
+        $this->authorize('update', $taskStatus);
+
+        return Inertia::render('TaskManagement::statuses/edit', [
+            'status' => $taskStatus,
         ]);
     }
 
@@ -55,6 +90,8 @@ class TaskStatusController extends Controller
      */
     public function update(TaskStatusRequest $request, TaskStatus $taskStatus)
     {
+        $this->authorize('update', $taskStatus);
+
         $data = $request->validated();
 
         // Ensure only one default status
@@ -64,11 +101,11 @@ class TaskStatusController extends Controller
 
         $taskStatus->update($data);
 
-        return response()->json([
-            'success' => true,
-            'status' => $taskStatus->fresh(),
-            'message' => 'Status updated successfully.',
-        ]);
+        return redirect()->back()
+            ->with('toast', [
+                'success' => true,
+                'message' => 'Status updated successfully.',
+            ]);
     }
 
     /**
@@ -76,28 +113,33 @@ class TaskStatusController extends Controller
      */
     public function destroy(TaskStatus $taskStatus)
     {
+        $this->authorize('delete', $taskStatus);
+
         // Prevent deletion if status has tasks
         if ($taskStatus->tasks()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete status with existing tasks.',
-            ], 422);
+            return redirect()->back()
+                ->with('toast', [
+                    'error' => true,
+                    'message' => 'Cannot delete status with existing tasks. Please reassign tasks first.',
+                ]);
         }
 
         // Prevent deletion of default status
         if ($taskStatus->is_default) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete the default status.',
-            ], 422);
+            return redirect()->back()
+                ->with('toast', [
+                    'error' => true,
+                    'message' => 'Cannot delete the default status. Please set another status as default first.',
+                ]);
         }
 
         $taskStatus->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status deleted successfully.',
-        ]);
+        return redirect()->back()
+            ->with('toast', [
+                'success' => true,
+                'message' => 'Status deleted successfully.',
+            ]);
     }
 
     /**
@@ -105,6 +147,8 @@ class TaskStatusController extends Controller
      */
     public function reorder(Request $request)
     {
+        $this->authorize('update', TaskStatus::class);
+
         $validated = $request->validate([
             'statuses' => 'required|array',
             'statuses.*.id' => 'required|exists:task_statuses,id',
@@ -116,9 +160,10 @@ class TaskStatusController extends Controller
                 ->update(['sort' => $statusData['sort']]);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Statuses reordered successfully.',
-        ]);
+        return redirect()->back()
+            ->with('toast', [
+                'success' => true,
+                'message' => 'Statuses reordered successfully.',
+            ]);
     }
 }

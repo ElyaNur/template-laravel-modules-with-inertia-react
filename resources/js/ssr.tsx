@@ -16,7 +16,7 @@ createServer((page) =>
             return (
                 <>
                     <App {...props} />
-                    <Toaster position="top-center" />
+                    <Toaster position="top-center" richColors />
                 </>
             );
         },

@@ -14,6 +14,7 @@ class TaskManagementDatabaseSeeder extends Seeder
         $this->call([
             TaskStatusSeeder::class,
             TaskSeeder::class,
+            TaskManagementMenuSeeder::class,
         ]);
     }
 }

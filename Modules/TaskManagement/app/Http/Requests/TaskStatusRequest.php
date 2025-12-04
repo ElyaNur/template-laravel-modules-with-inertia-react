@@ -21,9 +21,14 @@ class TaskStatusRequest extends FormRequest
     {
         $statusId = $this->route('taskStatus')?->id;
 
+        $uniqueRule = 'unique:task_statuses,slug';
+        if ($statusId) {
+            $uniqueRule .= ',' . $statusId;
+        }
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:task_statuses,slug,' . $statusId],
+            'slug' => ['required', 'string', 'max:255', $uniqueRule],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'sort' => ['nullable', 'integer', 'min:0'],
             'is_default' => ['nullable', 'boolean'],
