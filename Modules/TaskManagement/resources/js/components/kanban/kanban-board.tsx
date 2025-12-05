@@ -234,20 +234,49 @@ export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardPr
         }
 
         const taskId = active.id as number;
-        const targetId = over.id as number;
+        const targetId = over.id;
+
+        console.log('🎯 DRAG END - Task Drop Debug:');
+        console.log('  Active ID (task being dragged):', taskId);
+        console.log('  Over ID (drop target):', targetId);
+        console.log('  Over Data:', over.data.current);
+        console.log('  Available statuses:', statuses.map(s => ({ id: s.id, name: s.name, taskCount: s.tasks.length })));
 
         // Find which status we dropped onto
-        // IMPORTANT: Check column IDs FIRST, then task IDs (to avoid ID collisions)
-        let targetStatus = statuses.find((status) => status.id === targetId);
+        const overData = over.data.current;
+        let targetStatus;
 
-        if (!targetStatus) {
-            // Not a column, maybe dropped on a task - find which column that task is in
-            targetStatus = statuses.find((status) =>
-                status.tasks.some((task) => task.id === targetId)
-            );
+        if (overData?.type === 'column') {
+            console.log('  ✅ Detected drop on COLUMN droppable (empty column scenario)');
+            // Dropped on column droppable - extract status ID from "column-X" format
+            const statusId = Number(targetId.toString().replace('column-', ''));
+            console.log('  Extracted status ID from column:', statusId);
+            targetStatus = statuses.find((status) => status.id === statusId);
+            console.log('  Found target status:', targetStatus?.name);
+        } else if (overData?.type === 'status') {
+            console.log('  ✅ Detected drop on STATUS droppable (empty column)');
+            // Dropped on status droppable area
+            targetStatus = statuses.find((status) => status.id === Number(targetId));
+            console.log('  Found target status by ID:', targetStatus?.name);
+        } else {
+            console.log('  🔍 Checking if dropped on task...');
+            // IMPORTANT: Check column IDs FIRST, then task IDs (to avoid ID collisions)
+            targetStatus = statuses.find((status) => status.id === Number(targetId));
+            console.log('  Check 1 - Direct status ID match:', targetStatus?.name || 'NOT FOUND');
+
+            if (!targetStatus) {
+                // Not a column, maybe dropped on a task - find which column that task is in
+                targetStatus = statuses.find((status) =>
+                    status.tasks.some((task) => task.id === Number(targetId))
+                );
+                console.log('  Check 2 - Find status containing task:', targetStatus?.name || 'NOT FOUND');
+            }
         }
 
+        console.log('  Final target status:', targetStatus ? `${targetStatus.name} (ID: ${targetStatus.id})` : '❌ NULL - DROP WILL BE CANCELLED');
+
         if (!targetStatus) {
+            console.log('  ❌ No target status found! Reverting to initial state.');
             setStatuses(initialStatuses);
             return;
         }
