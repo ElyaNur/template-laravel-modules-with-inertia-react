@@ -17,42 +17,25 @@ import { formatDistanceToNow } from 'date-fns';
 import { Plus } from 'lucide-react';
 import KanbanColumn from './kanban-column';
 import KanbanCard from './kanban-card';
+import { KanbanStatusData, KanbanTaskData } from '@/types';
 
-type TaskData = {
-    id: number;
-    title: string;
-    description?: string;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    priority_color: string;
-    deadline?: string;
-    is_overdue: boolean;
-    assigned_users: Array<{
-        id: number;
-        name: string;
-        email: string;
-    }>;
-    sort: number;
+// Extended type for internal state with formatted deadline
+type TaskDataWithFormatted = KanbanTaskData & {
     formattedDeadline?: string | null;
 };
 
-type StatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    is_completed: boolean;
-    sort: number;
-    tasks: TaskData[];
+type StatusDataWithFormatted = Omit<KanbanStatusData, 'tasks'> & {
+    tasks: TaskDataWithFormatted[];
 };
 
 type KanbanBoardProps = {
-    statuses: StatusData[];
+    statuses: KanbanStatusData[];
 };
 
 export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardProps) {
-    const [activeTask, setActiveTask] = useState<TaskData | null>(null);
-    const [activeColumn, setActiveColumn] = useState<StatusData | null>(null);
-    const [statuses, setStatuses] = useState(initialStatuses);
+    const [activeTask, setActiveTask] = useState<KanbanTaskData | null>(null);
+    const [activeColumn, setActiveColumn] = useState<KanbanStatusData | null>(null);
+    const [statuses, setStatuses] = useState<StatusDataWithFormatted[]>(initialStatuses);
     const isDraggingRef = useRef(false);
     const dragTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -339,7 +322,7 @@ export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardPr
     }, [statuses, initialStatuses]);
 
     // Pre-compute formatted dates for all tasks (runs once per state change)
-    const enhancedStatuses = useMemo(() =>
+    const enhancedStatuses = useMemo<StatusDataWithFormatted[]>(() =>
         statuses.map(status => ({
             ...status,
             tasks: status.tasks.map(task => ({

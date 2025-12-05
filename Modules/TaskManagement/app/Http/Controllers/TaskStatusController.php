@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\TaskManagement\Http\Requests\TaskStatusRequest;
+use Modules\TaskManagement\Models\Project;
 use Modules\TaskManagement\Models\TaskStatus;
 
 class TaskStatusController extends Controller
@@ -16,26 +17,61 @@ class TaskStatusController extends Controller
     /**
      * Display a listing of task statuses.
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', TaskStatus::class);
+        
+        // Get available projects for dropdown
+        $projects = Project::active()->get();
+        
+        // Get selected project from query param or default to first project
+        $selectedProjectId = $request->input('project_id', $projects->first()?->id);
+        
+        // If no projects exist, show empty state
+        if (!$selectedProjectId) {
+            return Inertia::render('TaskManagement::statuses/index', [
+                'statuses' => ['data' => []],
+                'projects' => [],
+                'selectedProject' => null,
+            ]);
+        }
 
-        $statuses = TaskStatus::sorted()->withCount('tasks')->paginate(15);
+        $statuses = TaskStatus::forProject($selectedProjectId)
+            ->sorted()
+            ->withCount([
+                'tasks' => function ($query) use ($selectedProjectId) {
+                    $query->where('project_id', $selectedProjectId);
+                }
+            ])
+            ->paginate(15);
 
         return Inertia::render('TaskManagement::statuses/index', [
             'statuses' => $statuses,
+            'projects' => $projects,
+            'selectedProject' => $selectedProjectId,
         ]);
     }
 
     /**
      * Show the form for creating a new task status.
      */
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', TaskStatus::class);
+        
+        // Get selected project from query param
+        $projects = Project::active()->get();
+        $selectedProjectId = $request->input('project_id', $projects->first()?->id);
+        
+        // Calculate next sort for the selected project
+        $nextSort = $selectedProjectId 
+            ? TaskStatus::forProject($selectedProjectId)->max('sort') + 1
+            : 0;
 
         return Inertia::render('TaskManagement::statuses/create', [
-            'nextSort' => TaskStatus::max('sort') + 1,
+            'nextSort' => $nextSort,
+            'projects' => $projects,
+            'selectedProject' => $selectedProjectId,
         ]);
     }
 
@@ -48,25 +84,30 @@ class TaskStatusController extends Controller
 
         $data = $request->validated();
 
-        // Auto-generate sort number if not provided
-        if (!isset($data['sort'])) {
-            $data['sort'] = TaskStatus::max('sort') + 1;
+        // Auto-generate sort number if not provided (scoped to project)
+        if (!isset($data['sort']) && isset($data['project_id'])) {
+            $data['sort'] = TaskStatus::forProject($data['project_id'])->max('sort') + 1;
         }
 
-        // Ensure only one default status
+        // Ensure only one default status per project
         if ($data['is_default'] ?? false) {
-            TaskStatus::where('is_default', true)->update(['is_default' => false]);
+            TaskStatus::forProject($data['project_id'])
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
         }
 
         TaskStatus::create($data);
 
+        // Preserve project_id when redirecting
+        $queryParams = ['project_id' => $data['project_id']];
+        
         // Check for explicit return parameter (e.g., from Kanban ?return=kanban)
         $returnRoute = match($request->query('return')) {
             'kanban' => 'task-management.kanban-board.index',
             default => 'task-management.task-statuses.index',
         };
 
-        return redirect()->route($returnRoute)
+        return redirect()->route($returnRoute, $queryParams)
             ->with('toast', [
                 'success' => true,
                 'message' => 'Status created successfully.',

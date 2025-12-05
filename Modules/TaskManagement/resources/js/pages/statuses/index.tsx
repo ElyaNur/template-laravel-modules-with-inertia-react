@@ -3,29 +3,35 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, PaginatedResponse, SharedData } from '@/types';
+import { BreadcrumbItem, PaginatedResponse, SharedData, TaskStatusData, ProjectData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableStatusRow } from './components/sortable-status-row';
-
-type TaskStatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    sort: number;
-    is_default: boolean;
-    is_completed: boolean;
-    tasks_count: number;
-};
+import { ProjectSelector } from '@/components/project-selector';
 
 const StatusIndex = () => {
-    const { statuses: initialStatuses } = usePage<SharedData & { statuses: PaginatedResponse<TaskStatusData> }>().props;
+    const { statuses: initialStatuses, projects, selectedProject } = usePage<SharedData & {
+        statuses: PaginatedResponse<TaskStatusData>;
+        projects: ProjectData[];
+        selectedProject: number | null;
+    }>().props;
     const [statuses, setStatuses] = useState(initialStatuses.data);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Sync state when initialStatuses changes (e.g., when project filter changes)
+    useEffect(() => {
+        setStatuses(initialStatuses.data);
+    }, [initialStatuses]);
+
+    const handleProjectChange = (projectId: number) => {
+        router.get('/task-management/task-statuses', { project_id: projectId }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -80,12 +86,21 @@ const StatusIndex = () => {
             <Head title="Task Statuses" />
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <div className="flex flex-col space-y-1.5">
-                        <CardTitle>Task Statuses</CardTitle>
-                        <CardDescription>Manage Kanban board columns and task workflow</CardDescription>
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col space-y-1.5">
+                            <CardTitle>Task Statuses</CardTitle>
+                            <CardDescription>Manage Kanban board columns and task workflow</CardDescription>
+                        </div>
+                        {projects && projects.length > 0 && (
+                            <ProjectSelector
+                                projects={projects}
+                                selectedProjectId={selectedProject}
+                                onProjectChange={handleProjectChange}
+                            />
+                        )}
                     </div>
                     <Button asChild>
-                        <Link href="/task-management/task-statuses/create">
+                        <Link href={`/task-management/task-statuses/create${selectedProject ? `?project_id=${selectedProject}` : ''}`}>
                             <Plus className="mr-2 h-4 w-4" />
                             Add Status
                         </Link>

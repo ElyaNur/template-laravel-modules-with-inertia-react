@@ -14,10 +14,22 @@ class TaskService
     /**
      * Get tasks grouped by status for kanban board.
      */
-    public function getTasksForKanban(?int $assignedUserId = null, ?string $priority = null): array
+    public function getTasksForKanban(?int $assignedUserId = null, ?string $priority = null, ?int $projectId = null): array
     {
-        $statuses = TaskStatus::sorted()->with(['tasks' => function ($query) use ($assignedUserId, $priority) {
+        $query = TaskStatus::sorted();
+        
+        // Filter by project if provided
+        if ($projectId) {
+            $query->forProject($projectId);
+        }
+        
+        $statuses = $query->with(['tasks' => function ($query) use ($assignedUserId, $priority, $projectId) {
             $query->sorted()->with(['creator', 'assignedUsers']);
+            
+            // Filter by project if provided
+            if ($projectId) {
+                $query->forProject($projectId);
+            }
             
             if ($assignedUserId) {
                 $query->assignedTo($assignedUserId);
@@ -43,9 +55,14 @@ class TaskService
     /**
      * Get tasks for data table with filtering.
      */
-    public function getTasksForDataTable(array $filters = []): LengthAwarePaginator
+    public function getTasksForDataTable(array $filters = [], ?int $projectId = null): LengthAwarePaginator
     {
         $query = Task::with(['status', 'creator', 'assignedUsers']);
+        
+        // Filter by project if provided
+        if ($projectId) {
+            $query->forProject($projectId);
+        }
 
         // Handle soft deletes
         if (isset($filters['withTrashed'])) {

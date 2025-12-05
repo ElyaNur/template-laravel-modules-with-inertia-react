@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Modules\TaskManagement\Http\Requests\TaskRequest;
+use Modules\TaskManagement\Models\Project;
 use Modules\TaskManagement\Models\Task;
 use Modules\TaskManagement\Models\TaskStatus;
 use Modules\TaskManagement\Services\TaskService;
@@ -26,14 +27,34 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Task::class);
+        
+        // Get available projects for dropdown
+        $projects = Project::active()->get();
+        
+        // Get selected project from query param or default to first project
+        $selectedProjectId = $request->input('project_id', $projects->first()?->id);
+        
+        // If no projects exist, show empty state
+        if (!$selectedProjectId) {
+            return Inertia::render('TaskManagement::tasks/index', [
+                'tasks' => ['data' => [], 'total' => 0],
+                'statuses' => [],
+                'users' => User::select('id', 'name', 'email')->get(),
+                'projects' => [],
+                'selectedProject' => null,
+                'filters' => [],
+            ]);
+        }
 
         $filters = $request->only(['status', 'priority', 'assigned_to', 'filter', 'overdue', 'sort', 'withTrashed']);
-        $tasks = $this->taskService->getTasksForDataTable($filters);
+        $tasks = $this->taskService->getTasksForDataTable($filters, $selectedProjectId);
 
         return Inertia::render('TaskManagement::tasks/index', [
             'tasks' => $tasks,
-            'statuses' => TaskStatus::sorted()->get(),
+            'statuses' => TaskStatus::forProject($selectedProjectId)->sorted()->get(),
             'users' => User::select('id', 'name', 'email')->get(),
+            'projects' => $projects,
+            'selectedProject' => $selectedProjectId,
             'filters' => $filters,
         ]);
     }
@@ -44,6 +65,23 @@ class TaskController extends Controller
     public function kanban(Request $request)
     {
         $this->authorize('viewAny', Task::class);
+        
+        // Get available projects for dropdown
+        $projects = Project::active()->get();
+        
+        // Get selected project from query param or default to first project
+        $selectedProjectId = $request->input('project_id', $projects->first()?->id);
+        
+        // If no projects exist, show empty state
+        if (!$selectedProjectId) {
+            return Inertia::render('TaskManagement::tasks/kanban', [
+                'kanbanData' => [],
+                'users' => User::select('id', 'name', 'email')->get(),
+                'projects' => [],
+                'selectedProject' => null,
+                'filters' => [],
+            ]);
+        }
 
         $filters = [
             'assigned_to' => $request->input('assigned_to'),
@@ -52,12 +90,15 @@ class TaskController extends Controller
 
         $kanbanData = $this->taskService->getTasksForKanban(
             $filters['assigned_to'],
-            $filters['priority']
+            $filters['priority'],
+            $selectedProjectId
         );
 
         return Inertia::render('TaskManagement::tasks/kanban', [
             'kanbanData' => $kanbanData,
             'users' => User::select('id', 'name', 'email')->get(),
+            'projects' => $projects,
+            'selectedProject' => $selectedProjectId,
             'filters' => $filters,
         ]);
     }
@@ -65,13 +106,19 @@ class TaskController extends Controller
     /**
      * Show the form for creating a new task.
      */
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Task::class);
+        
+        // Get selected project from query param
+        $projects = Project::active()->get();
+        $selectedProjectId = $request->input('project_id', $projects->first()?->id);
 
         return Inertia::render('TaskManagement::tasks/create', [
-            'statuses' => TaskStatus::sorted()->get(),
+            'statuses' => $selectedProjectId ? TaskStatus::forProject($selectedProjectId)->sorted()->get() : [],
             'users' => User::select('id', 'name', 'email')->get(),
+            'projects' => $projects,
+            'selectedProject' => $selectedProjectId,
         ]);
     }
 
@@ -128,7 +175,7 @@ class TaskController extends Controller
 
         return Inertia::render('TaskManagement::tasks/edit', [
             'task' => $task,
-            'statuses' => TaskStatus::sorted()->get(),
+            'statuses' => TaskStatus::forProject($task->project_id)->sorted()->get(),
             'users' => User::select('id', 'name', 'email')->get(),
         ]);
     }

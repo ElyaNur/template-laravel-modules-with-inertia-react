@@ -7,17 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button';
 import { Link, router } from '@inertiajs/react';
 import { MoreHorizontal, Pencil, Trash2, GripVertical } from 'lucide-react';
-
-type TaskStatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    sort: number;
-    is_default: boolean;
-    is_completed: boolean;
-    tasks_count: number;
-};
+import { TaskStatusData } from '@/types';
 
 export const columns: ColumnDef<TaskStatusData>[] = [
     {
@@ -50,7 +40,7 @@ export const columns: ColumnDef<TaskStatusData>[] = [
         accessorKey: 'tasks_count',
         header: ({ column }) => <DataTableColumnHeader column={column} title="TASKS" />,
         cell: ({ row }) => {
-            return <span className="text-muted-foreground">{row.original.tasks_count}</span>;
+            return <span className="text-muted-foreground">{row.original.tasks_count ?? 0}</span>;
         },
     },
     {

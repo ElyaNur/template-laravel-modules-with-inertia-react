@@ -22,6 +22,7 @@ class Task extends Model
         'deadline',
         'completed_at',
         'sort',
+        'project_id',
     ];
 
     protected $casts = [
@@ -29,6 +30,14 @@ class Task extends Model
         'completed_at' => 'datetime',
         'sort' => 'integer',
     ];
+
+    /**
+     * Get the project this task belongs to.
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 
     /**
      * Get the status for this task.
@@ -99,6 +108,14 @@ class Task extends Model
     }
 
     /**
+     * Scope to filter by project.
+     */
+    public function scopeForProject($query, $projectId)
+    {
+        return $query->where('project_id', $projectId);
+    }
+
+    /**
      * Check if the task is overdue.
      */
     public function isOverdue(): bool
@@ -143,7 +160,7 @@ class Task extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['title', 'description', 'task_status_id', 'priority', 'deadline', 'completed_at'])
+            ->logOnly(['title', 'description', 'task_status_id', 'priority', 'deadline', 'completed_at', 'project_id'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

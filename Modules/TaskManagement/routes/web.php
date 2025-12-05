@@ -1,12 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\TaskManagement\Http\Controllers\ProjectController;
 use Modules\TaskManagement\Http\Controllers\TaskController;
 use Modules\TaskManagement\Http\Controllers\TaskStatusController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('task-management')->name('task-management.')->group(function () {
-        // All Tasks routes
+        // Project routes
+        Route::prefix('projects')->name('projects.')->group(function () {
+            Route::get('/', [ProjectController::class, 'index'])->name('index');
+            Route::get('/create', [ProjectController::class, 'create'])->name('create');
+            Route::post('/', [ProjectController::class, 'store'])->name('store');
+            Route::get('/{project}', [ProjectController::class, 'show'])->name('show');
+            Route::get('/{project}/edit', [ProjectController::class, 'edit'])->name('edit');
+            Route::put('/{project}', [ProjectController::class, 'update'])->name('update');
+            Route::delete('/{project}', [ProjectController::class, 'destroy'])->name('destroy');
+            Route::patch('/{project}/archive', [ProjectController::class, 'archive'])->name('archive');
+        });
+        
+        // All Tasks routes (kept for backward compatibility)
         Route::prefix('all-tasks')->name('all-tasks.')->group(function () {
             Route::get('/', [TaskController::class, 'index'])->name('index');
             Route::get('/create', [TaskController::class, 'create'])->name('create');
@@ -23,12 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('complete');
         });
         
-        // Kanban Board routes
+        // Kanban Board routes (kept for backward compatibility)
         Route::prefix('kanban-board')->name('kanban-board.')->group(function () {
             Route::get('/', [TaskController::class, 'kanban'])->name('index');
         });
         
-        // Status management
+        // Status management (kept for backward compatibility)
         Route::prefix('task-statuses')->name('task-statuses.')->group(function () {
             Route::get('/', [TaskStatusController::class, 'index'])->name('index');
             Route::get('/create', [TaskStatusController::class, 'create'])->name('create');

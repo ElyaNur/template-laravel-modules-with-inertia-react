@@ -3,42 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, SharedData, TaskData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Pencil, Calendar, User, CheckCircle2 } from 'lucide-react';
 import { ReactNode } from 'react';
 import { format } from 'date-fns';
-
-type TaskData = {
-    id: number;
-    title: string;
-    description?: string;
-    status: {
-        id: number;
-        name: string;
-        color: string;
-    };
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    priority_color: string;
-    deadline?: string;
-    completed_at?: string;
-    creator: {
-        id: number;
-        name: string;
-        email: string;
-    };
-    assigned_users: Array<{
-        id: number;
-        name: string;
-        email: string;
-    }>;
-    created_at: string;
-    updated_at: string;
-};
-
-type PageProps = {
-    task: TaskData;
-};
 
 const priorityLabels = {
     low: 'Low',
@@ -48,7 +17,7 @@ const priorityLabels = {
 };
 
 const ShowTask = () => {
-    const { task } = usePage<PageProps>().props;
+    const { task } = usePage<SharedData & { task: TaskData }>().props;
 
     return (
         <>

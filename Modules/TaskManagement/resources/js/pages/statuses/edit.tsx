@@ -1,21 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem, SharedData, TaskStatusData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { ReactNode } from 'react';
 import StatusForm from './components/status-form';
-
-type TaskStatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    sort: number;
-    is_default: boolean;
-    is_completed: boolean;
-};
 
 const EditStatus = () => {
     const { status } = usePage<SharedData & { status: TaskStatusData }>().props;

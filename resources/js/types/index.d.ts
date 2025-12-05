@@ -62,6 +62,9 @@ export interface SharedData {
     statuses: TaskStatusData[];
     kanbanData: KanbanStatusData[];
     filters: TaskFilters;
+    projects: ProjectData[];
+    project: ProjectData;
+    selectedProject: number | null;
 }
 
 export type ListData = {
@@ -201,6 +204,7 @@ export type TaskStatusData = {
     sort: number;
     is_default: boolean;
     is_completed: boolean;
+    tasks_count?: number;
     created_at?: string;
     updated_at?: string;
 };
@@ -253,6 +257,7 @@ export type KanbanStatusData = {
     name: string;
     slug: string;
     color: string;
+    sort: number;
     is_completed: boolean;
     tasks: KanbanTaskData[];
 };
@@ -263,6 +268,26 @@ export type TaskFilters = {
     assigned_to?: number;
     search?: string;
     overdue?: boolean;
+};
+
+export type ProjectData = {
+    id: number;
+    name: string;
+    slug: string;
+    description: string | null;
+    color: string;
+    created_by: number;
+    is_archived: boolean;
+    created_at: string;
+    updated_at: string;
+    deleted_at: string | null;
+    creator?: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    tasks_count?: number;
+    statuses_count?: number;
 };
 
 export type PermissionData = {

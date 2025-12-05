@@ -16,35 +16,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-type TaskData = {
-    id: number;
-    title: string;
-    description?: string;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    priority_color: string;
-    deadline?: string;
-    is_overdue: boolean;
-    assigned_users: Array<{
-        id: number;
-        name: string;
-        email: string;
-    }>;
-    sort: number;
-};
-
-type StatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    is_completed: boolean;
-    sort: number;
-    tasks: TaskData[];
-};
+import { KanbanStatusData, KanbanTaskData } from '@/types';
 
 type KanbanColumnProps = {
-    status: StatusData;
+    status: KanbanStatusData & { tasks: (KanbanTaskData & { formattedDeadline?: string | null })[] };
     isDraggingColumn?: boolean;
 };
 

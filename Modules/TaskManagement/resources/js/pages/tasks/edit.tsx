@@ -1,28 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, SharedData, TaskData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { ReactNode } from 'react';
 import TaskForm from '../../components/task-form';
 
-type TaskData = {
-    id: number;
-    title: string;
-    description?: string;
-    task_status_id: number;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    deadline?: string;
-    assigned_users: Array<{ id: number }>;
-};
-
-type PageProps = {
-    task: TaskData;
-    statuses: Array<{ id: number; name: string; color: string }>;
-    users: Array<{ id: number; name: string; email: string }>;
-};
-
 const EditTask = () => {
-    const { task, statuses, users } = usePage<PageProps>().props;
+    const { task, statuses, users } = usePage<SharedData & {
+        task: TaskData;
+        statuses: Array<{ id: number; name: string; color: string }>;
+        users: Array<{ id: number; name: string; email: string }>;
+    }>().props;
 
     return (
         <>

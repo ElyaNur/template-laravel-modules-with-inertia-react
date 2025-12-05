@@ -6,17 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button';
 import { Link, router } from '@inertiajs/react';
 import { GripVertical, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
-
-type TaskStatusData = {
-    id: number;
-    name: string;
-    slug: string;
-    color: string;
-    sort: number;
-    is_default: boolean;
-    is_completed: boolean;
-    tasks_count: number;
-};
+import { TaskStatusData } from '@/types';
 
 type SortableStatusRowProps = {
     status: TaskStatusData;
@@ -53,7 +43,7 @@ export function SortableStatusRow({ status }: SortableStatusRowProps) {
                 </div>
             </TableCell>
             <TableCell>
-                <span className="text-muted-foreground">{status.tasks_count}</span>
+                <span className="text-muted-foreground">{status.tasks_count ?? 0}</span>
             </TableCell>
             <TableCell>
                 {status.is_default && (

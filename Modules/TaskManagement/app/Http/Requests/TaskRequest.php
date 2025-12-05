@@ -27,7 +27,33 @@ class TaskRequest extends FormRequest
             'deadline' => ['nullable', 'date', 'after_or_equal:today'],
             'assigned_users' => ['nullable', 'array'],
             'assigned_users.*' => ['exists:users,id'],
+            'project_id' => ['required', 'exists:projects,id'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            // Ensure task_status_id belongs to the same project
+            $projectId = $this->route('project')?->id ?? $this->input('project_id');
+            $taskStatusId = $this->input('task_status_id');
+
+            if ($projectId && $taskStatusId) {
+                $statusBelongsToProject = \Modules\TaskManagement\Models\TaskStatus::where('id', $taskStatusId)
+                    ->where('project_id', $projectId)
+                    ->exists();
+
+                if (!$statusBelongsToProject) {
+                    $validator->errors()->add(
+                        'task_status_id',
+                        'The selected status does not belong to this project.'
+                    );
+                }
+            }
+        });
     }
 
     /**

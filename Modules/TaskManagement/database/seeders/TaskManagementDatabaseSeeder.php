@@ -11,9 +11,9 @@ class TaskManagementDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // ProjectSeeder will create projects with their own task statuses and tasks
         $this->call([
-            TaskStatusSeeder::class,
-            TaskSeeder::class,
+            ProjectSeeder::class,
             TaskManagementMenuSeeder::class,
         ]);
     }

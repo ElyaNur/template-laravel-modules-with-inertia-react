@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('task_statuses', function (Blueprint $table) {
             $table->id();
             $table->string('name');           // e.g., "To Do", "In Progress", "Done"
-            $table->string('slug')->unique(); // e.g., "to-do", "in-progress", "done"
+            $table->string('slug');            // e.g., "to-do", "in-progress", "done" (unique per project)
             $table->string('color', 7);       // Hex color for UI, e.g., "#3b82f6"
             $table->integer('sort')->default(0);
             $table->boolean('is_default')->default(false);

@@ -20,12 +20,24 @@ class TaskManagementMenuSeeder extends Seeder
             'models' => [],
         ]);
 
+        // Create "Projects" sub-menu
+        Menu::create([
+            'parent_id' => $taskManagementMenu->id,
+            'nama' => 'Projects',
+            'keterangan' => 'Organize tasks and workflows by project',
+            'sort' => 1,
+            'icon' => null,
+            'is_active' => true,
+            'permissions' => [],
+            'models' => ['Modules\\TaskManagement\\Project'],
+        ]);
+
         // Create "All Tasks" sub-menu
         Menu::create([
             'parent_id' => $taskManagementMenu->id,
             'nama' => 'All Tasks',
             'keterangan' => 'View and manage all tasks in list format',
-            'sort' => 1,
+            'sort' => 2,
             'icon' => null,
             'is_active' => true,
             'permissions' => [],
@@ -37,7 +49,7 @@ class TaskManagementMenuSeeder extends Seeder
             'parent_id' => $taskManagementMenu->id,
             'nama' => 'Kanban Board',
             'keterangan' => 'Visual task board with drag and drop',
-            'sort' => 2,
+            'sort' => 3,
             'icon' => null,
             'is_active' => true,
             'permissions' => ['task:view-any'],
@@ -49,7 +61,7 @@ class TaskManagementMenuSeeder extends Seeder
             'parent_id' => $taskManagementMenu->id,
             'nama' => 'Task Statuses',
             'keterangan' => 'Manage Kanban board columns and task workflow',
-            'sort' => 3,
+            'sort' => 4,
             'icon' => null,
             'is_active' => true,
             'permissions' => ['task-status:view-any'],

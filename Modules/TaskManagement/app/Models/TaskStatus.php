@@ -19,6 +19,7 @@ class TaskStatus extends Model
         'sort',
         'is_default',
         'is_completed',
+        'project_id',
     ];
 
     protected $casts = [
@@ -26,6 +27,14 @@ class TaskStatus extends Model
         'is_completed' => 'boolean',
         'sort' => 'integer',
     ];
+
+    /**
+     * Get the project this status belongs to.
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 
     /**
      * Get the tasks for this status.
@@ -52,6 +61,14 @@ class TaskStatus extends Model
     }
 
     /**
+     * Scope to filter by project.
+     */
+    public function scopeForProject($query, $projectId)
+    {
+        return $query->where('project_id', $projectId);
+    }
+
+    /**
      * Check if this status marks tasks as completed.
      */
     public function isCompleted(): bool
@@ -73,7 +90,7 @@ class TaskStatus extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'slug', 'color', 'sort', 'is_default', 'is_completed'])
+            ->logOnly(['name', 'slug', 'color', 'sort', 'is_default', 'is_completed', 'project_id'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

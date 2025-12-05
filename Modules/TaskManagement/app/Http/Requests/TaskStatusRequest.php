@@ -3,6 +3,7 @@
 namespace Modules\TaskManagement\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class TaskStatusRequest extends FormRequest
 {
@@ -19,20 +20,24 @@ class TaskStatusRequest extends FormRequest
      */
     public function rules(): array
     {
-        $statusId = $this->route('taskStatus')?->id;
-
-        $uniqueRule = 'unique:task_statuses,slug';
-        if ($statusId) {
-            $uniqueRule .= ',' . $statusId;
-        }
+        $statusId = $this->route('status')?->id ?? $this->route('taskStatus')?->id;
+        $projectId = $this->route('project')?->id ?? $this->input('project_id');
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', $uniqueRule],
+            'slug' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('task_statuses', 'slug')
+                    ->ignore($statusId)
+                    ->where('project_id', $projectId),
+            ],
             'color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'sort' => ['nullable', 'integer', 'min:0'],
             'is_default' => ['nullable', 'boolean'],
             'is_completed' => ['nullable', 'boolean'],
+            'project_id' => ['required', 'exists:projects,id'],
         ];
     }
 
