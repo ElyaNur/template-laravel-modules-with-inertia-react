@@ -157,10 +157,36 @@ class TaskController extends Controller
     {
         $this->authorize('view', $task);
 
-        $task->load(['status', 'creator', 'assignedUsers']);
+        $task->load([
+            'status',
+            'creator',
+            'assignedUsers',
+            'project',
+            'comments.user',
+            'comments.replies.user',
+            'comments.replies.replies.user', // Support 2 levels of nesting
+            'attachments.uploader',
+            // Load dependencies
+            'dependencies.dependsOnTask.status',
+            'dependentTasks.task.status',
+        ]);
+
+        // Add computed fields
+        $task->is_blocked = $task->isBlocked();
+
+        // Get activity log for this task and format for frontend
+        $activities = \Spatie\Activitylog\Models\Activity::forSubject($task)
+            ->with('causer')
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->map(fn($activity) => \Modules\TaskManagement\Services\TaskActivityService::formatActivity($activity));
 
         return Inertia::render('TaskManagement::tasks/show', [
             'task' => $task,
+            'taskComments' => $task->comments,
+            'taskAttachments' => $task->attachments,
+            'activities' => $activities,
         ]);
     }
 

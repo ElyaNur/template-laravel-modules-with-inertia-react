@@ -18,7 +18,7 @@ type ProjectWithRelations = ProjectData & {
             color: string;
         };
     }>;
-    taskStatuses: Array<{
+    task_statuses: Array<{
         id: number;
         name: string;
         slug: string;
@@ -101,7 +101,7 @@ const ProjectShow = () => {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold">{project.taskStatuses?.length || 0}</div>
+                                <div className="text-2xl font-bold">{project.task_statuses?.length || 0}</div>
                             </CardContent>
                         </Card>
                         <Card>
@@ -122,7 +122,7 @@ const ProjectShow = () => {
             {/* Tabs */}
             <Tabs defaultValue="statuses" className="mt-6">
                 <TabsList>
-                    <TabsTrigger value="statuses">Statuses ({project.taskStatuses?.length || 0})</TabsTrigger>
+                    <TabsTrigger value="statuses">Statuses ({project.task_statuses?.length || 0})</TabsTrigger>
                     <TabsTrigger value="tasks">Tasks ({project.tasks?.length || 0})</TabsTrigger>
                 </TabsList>
 
@@ -134,7 +134,7 @@ const ProjectShow = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-2">
-                                {project.taskStatuses?.map((status) => (
+                                {project.task_statuses?.map((status) => (
                                     <div
                                         key={status.id}
                                         className="flex items-center justify-between p-3 border rounded-lg"
@@ -149,7 +149,7 @@ const ProjectShow = () => {
                                         <Badge variant="secondary">{status.tasks_count || 0} tasks</Badge>
                                     </div>
                                 ))}
-                                {(!project.taskStatuses || project.taskStatuses.length === 0) && (
+                                {(!project.task_statuses || project.task_statuses.length === 0) && (
                                     <p className="text-muted-foreground text-sm">No statuses yet.</p>
                                 )}
                             </div>

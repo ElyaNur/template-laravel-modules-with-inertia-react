@@ -2,7 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\TaskManagement\Http\Controllers\ProjectController;
+use Modules\TaskManagement\Http\Controllers\TaskAttachmentController;
+use Modules\TaskManagement\Http\Controllers\TaskCommentController;
 use Modules\TaskManagement\Http\Controllers\TaskController;
+use Modules\TaskManagement\Http\Controllers\TaskDependencyController;
 use Modules\TaskManagement\Http\Controllers\TaskStatusController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -34,6 +37,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->name('update-status');
             Route::patch('/{task}/complete', [TaskController::class, 'markAsCompleted'])
                 ->name('complete');
+            
+            // Task Comments
+            Route::prefix('/{task}/comments')->name('comments.')->group(function () {
+                Route::post('/', [TaskCommentController::class, 'store'])->name('store');
+                Route::put('/{comment}', [TaskCommentController::class, 'update'])->name('update');
+                Route::delete('/{comment}', [TaskCommentController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Task Attachments
+            Route::prefix('/{task}/attachments')->name('attachments.')->group(function () {
+                Route::post('/', [TaskAttachmentController::class, 'store'])->name('store');
+            });
+            
+            // Task Dependencies
+            Route::prefix('/{task}/dependencies')->name('dependencies.')->group(function () {
+                Route::get('/', [TaskDependencyController::class, 'index'])->name('index');
+                Route::post('/', [TaskDependencyController::class, 'store'])->name('store');
+                Route::delete('/{dependency}', [TaskDependencyController::class, 'destroy'])->name('destroy');
+            });
         });
         
         // Kanban Board routes (kept for backward compatibility)
@@ -54,5 +76,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::patch('/reorder', [TaskStatusController::class, 'reorder'])
                 ->name('reorder');
         });
+        
+        // Attachment routes (global, not scoped to tasks)
+        Route::get('/attachments/{attachment}/download', [TaskAttachmentController::class, 'download'])
+            ->name('attachments.download');
+        Route::delete('/attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])
+            ->name('attachments.destroy');
     });
 });

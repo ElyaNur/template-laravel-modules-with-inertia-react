@@ -65,6 +65,46 @@ class Task extends Model
     }
 
     /**
+     * Get the comments for this task (top-level only).
+     */
+    public function comments()
+    {
+        return $this->hasMany(TaskComment::class)->whereNull('parent_id')->latest();
+    }
+
+    /**
+     * Get all comments for this task (including replies).
+     */
+    public function allComments()
+    {
+        return $this->hasMany(TaskComment::class)->latest();
+    }
+
+    /**
+     * Get the attachments for this task.
+     */
+    public function attachments()
+    {
+        return $this->hasMany(TaskAttachment::class);
+    }
+
+    /**
+     * Get the dependencies for this task (tasks this task depends on).
+     */
+    public function dependencies()
+    {
+        return $this->hasMany(TaskDependency::class, 'task_id');
+    }
+
+    /**
+     * Get the dependent tasks (tasks that depend on this task).
+     */
+    public function dependentTasks()
+    {
+        return $this->hasMany(TaskDependency::class, 'depends_on_task_id');
+    }
+
+    /**
      * Scope to filter by priority.
      */
     public function scopePriority($query, $priority)
@@ -129,6 +169,33 @@ class Task extends Model
     public function isCompleted(): bool
     {
         return $this->completed_at !== null;
+    }
+
+    /**
+     * Check if the task is blocked by incomplete dependencies.
+     */
+    public function isBlocked(): bool
+    {
+        // A task is blocked if it has dependencies where the dependent task is not completed
+        return $this->dependencies()
+            ->whereHas('dependsOnTask', function($query) {
+                $query->whereNull('completed_at');
+            })
+            ->exists();
+    }
+
+    /**
+     * Get all blocking tasks (incomplete tasks this task depends on).
+     */
+    public function getBlockingTasks()
+    {
+        return $this->dependencies()
+            ->with('dependsOnTask')
+            ->whereHas('dependsOnTask', function($query) {
+                $query->whereNull('completed_at');
+            })
+            ->get()
+            ->pluck('dependsOnTask');
     }
 
     /**

@@ -65,6 +65,11 @@ export interface SharedData {
     projects: ProjectData[];
     project: ProjectData;
     selectedProject: number | null;
+
+    // Task Comments & Attachments
+    taskComments: TaskCommentData[];
+    taskAttachments: TaskAttachmentData[];
+    activities: ActivityData[];
 }
 
 export type ListData = {
@@ -80,6 +85,7 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    roles?: RoleData[];
     [key: string]: unknown; // This allows for additional properties...
 }
 
@@ -231,9 +237,36 @@ export type TaskData = {
         email: string;
     }>;
     sort: number;
+    project_id: number;
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
+
+    // Task Dependencies
+    dependencies?: TaskDependencyData[];
+    dependent_tasks?: TaskDependencyData[];
+    is_blocked?: boolean;
+};
+
+export type TaskDependencyData = {
+    id: number;
+    task_id: number;
+    depends_on_task_id: number;
+    dependency_type: 'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+    depends_on_task?: {
+        id: number;
+        title: string;
+        status: TaskStatusData;
+        completed_at?: string;
+    };
+    task?: {
+        id: number;
+        title: string;
+        status: TaskStatusData;
+        completed_at?: string;
+    };
+    created_at: string;
+    updated_at: string;
 };
 
 export type KanbanTaskData = {
@@ -287,7 +320,7 @@ export type ProjectData = {
         email: string;
     };
     tasks_count?: number;
-    statuses_count?: number;
+    task_statuses_count?: number;
 };
 
 export type PermissionData = {
@@ -306,4 +339,57 @@ export type PaginatedMetadata = {
     last_page: number;
     per_page: number;
     total: number;
+};
+
+// ==================== Comments & Attachments ====================
+
+export type TaskCommentData = {
+    id: number;
+    task_id: number;
+    user_id: number;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    content: string;
+    parent_id: number | null;
+    replies?: TaskCommentData[];
+    created_at: string;
+    updated_at: string;
+};
+
+export type TaskAttachmentData = {
+    id: number;
+    task_id: number;
+    uploaded_by: number;
+    uploader: {
+        id: number;
+        name: string;
+    };
+    filename: string;
+    original_filename: string;
+    path: string;
+    mime_type: string;
+    size: number;
+    human_size: string;
+    download_url: string;
+    created_at: string;
+    is_image: boolean;
+};
+
+export type ActivityData = {
+    id: number;
+    description: string;
+    subject_type: string;
+    subject_id: number;
+    causer_type: string | null;
+    causer_id: number | null;
+    causer?: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    properties: Record<string, unknown>;
+    created_at: string;
 };

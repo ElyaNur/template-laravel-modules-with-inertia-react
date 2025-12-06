@@ -89,7 +89,7 @@ const ProjectIndex = () => {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <Clock className="h-4 w-4" />
-                                                    <span>{project.statuses_count || 0} statuses</span>
+                                                    <span>{project.task_statuses_count || 0} statuses</span>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">

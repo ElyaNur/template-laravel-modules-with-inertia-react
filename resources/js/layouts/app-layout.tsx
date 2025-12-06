@@ -1,8 +1,10 @@
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
-import { type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { toast as toastr } from 'sonner';
+import { QuickTaskModal } from '@/components/quick-task-modal';
+import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut';
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -10,6 +12,16 @@ interface AppLayoutProps {
 }
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
+    const [quickTaskOpen, setQuickTaskOpen] = useState(false);
+
+    // Ctrl+K or Cmd+K to open quick task modal
+    useKeyboardShortcut({
+        key: 'k',
+        ctrlKey: true,
+        metaKey: true,
+        callback: () => setQuickTaskOpen(true),
+    });
+
     router.on('success', (event) => {
         const toast = event.detail.page.props.toast as { success: boolean; message: string };
 
@@ -38,9 +50,13 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
             ),
         });
     });
+
     return (
-        <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
-            {children}
-        </AppLayoutTemplate>
+        <>
+            <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+                {children}
+            </AppLayoutTemplate>
+            <QuickTaskModal open={quickTaskOpen} onOpenChange={setQuickTaskOpen} />
+        </>
     );
 };

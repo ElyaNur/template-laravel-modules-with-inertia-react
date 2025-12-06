@@ -30,9 +30,10 @@ type StatusDataWithFormatted = Omit<KanbanStatusData, 'tasks'> & {
 
 type KanbanBoardProps = {
     statuses: KanbanStatusData[];
+    selectedProject?: number | null;
 };
 
-export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardProps) {
+export default function KanbanBoard({ statuses: initialStatuses, selectedProject }: KanbanBoardProps) {
     const [activeTask, setActiveTask] = useState<KanbanTaskData | null>(null);
     const [activeColumn, setActiveColumn] = useState<KanbanStatusData | null>(null);
     const [statuses, setStatuses] = useState<StatusDataWithFormatted[]>(initialStatuses);
@@ -236,47 +237,29 @@ export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardPr
         const taskId = active.id as number;
         const targetId = over.id;
 
-        console.log('🎯 DRAG END - Task Drop Debug:');
-        console.log('  Active ID (task being dragged):', taskId);
-        console.log('  Over ID (drop target):', targetId);
-        console.log('  Over Data:', over.data.current);
-        console.log('  Available statuses:', statuses.map(s => ({ id: s.id, name: s.name, taskCount: s.tasks.length })));
-
         // Find which status we dropped onto
         const overData = over.data.current;
         let targetStatus;
 
         if (overData?.type === 'column') {
-            console.log('  ✅ Detected drop on COLUMN droppable (empty column scenario)');
             // Dropped on column droppable - extract status ID from "column-X" format
             const statusId = Number(targetId.toString().replace('column-', ''));
-            console.log('  Extracted status ID from column:', statusId);
             targetStatus = statuses.find((status) => status.id === statusId);
-            console.log('  Found target status:', targetStatus?.name);
         } else if (overData?.type === 'status') {
-            console.log('  ✅ Detected drop on STATUS droppable (empty column)');
             // Dropped on status droppable area
             targetStatus = statuses.find((status) => status.id === Number(targetId));
-            console.log('  Found target status by ID:', targetStatus?.name);
         } else {
-            console.log('  🔍 Checking if dropped on task...');
-            // IMPORTANT: Check column IDs FIRST, then task IDs (to avoid ID collisions)
+            // Check if dropped on task - find which column that task is in
             targetStatus = statuses.find((status) => status.id === Number(targetId));
-            console.log('  Check 1 - Direct status ID match:', targetStatus?.name || 'NOT FOUND');
 
             if (!targetStatus) {
-                // Not a column, maybe dropped on a task - find which column that task is in
                 targetStatus = statuses.find((status) =>
                     status.tasks.some((task) => task.id === Number(targetId))
                 );
-                console.log('  Check 2 - Find status containing task:', targetStatus?.name || 'NOT FOUND');
             }
         }
 
-        console.log('  Final target status:', targetStatus ? `${targetStatus.name} (ID: ${targetStatus.id})` : '❌ NULL - DROP WILL BE CANCELLED');
-
         if (!targetStatus) {
-            console.log('  ❌ No target status found! Reverting to initial state.');
             setStatuses(initialStatuses);
             return;
         }
@@ -391,7 +374,7 @@ export default function KanbanBoard({ statuses: initialStatuses }: KanbanBoardPr
 
                     {/* Create New Status Button */}
                     <Link
-                        href="/task-management/task-statuses/create?return=kanban"
+                        href={`/task-management/task-statuses/create?return=kanban${selectedProject ? `&project_id=${selectedProject}` : ''}`}
                         className="flex flex-col w-80 flex-shrink-0 min-h-[200px] p-4 rounded-lg border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-muted/50 transition-all group"
                     >
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground group-hover:text-primary transition-colors">

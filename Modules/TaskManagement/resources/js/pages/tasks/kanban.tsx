@@ -60,7 +60,7 @@ const KanbanView = () => {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <KanbanBoard statuses={kanbanData} />
+                    <KanbanBoard statuses={kanbanData} selectedProject={selectedProject} />
                 </CardContent>
             </Card>
         </>

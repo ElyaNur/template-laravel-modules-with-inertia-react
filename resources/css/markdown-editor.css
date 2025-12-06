@@ -1,0 +1,184 @@
+/* Custom styling for markdown editor to blend with theme */
+/* Using !important to override library defaults */
+
+/* Main editor container */
+.w-md-editor,
+.w-md-editor-content,
+.w-md-editor-input {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+/* Toolbar */
+.w-md-editor-toolbar {
+    background-color: hsl(var(--card)) !important;
+    border-bottom-color: hsl(var(--border)) !important;
+}
+
+.w-md-editor-toolbar li button {
+    color: hsl(var(--muted-foreground)) !important;
+}
+
+.w-md-editor-toolbar li button:hover {
+    background-color: hsl(var(--accent)) !important;
+    color: hsl(var(--accent-foreground)) !important;
+}
+
+.w-md-editor-toolbar li.active button {
+    color: hsl(var(--foreground)) !important;
+}
+
+/* Text area and preview */
+.w-md-editor-text-pre,
+.w-md-editor-text-input,
+.w-md-editor-text-pre>code {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.w-md-editor-text {
+    background-color: hsl(var(--card)) !important;
+}
+
+/* Code editor area */
+.w-md-editor-text-pre .w-md-editor-text-pre,
+.w-md-editor-text-input::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Markdown preview */
+.wmde-markdown,
+.wmde-markdown-color {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
+}
+
+.wmde-markdown code {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown pre {
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown pre>code {
+    background-color: transparent !important;
+}
+
+.wmde-markdown blockquote {
+    border-left-color: hsl(var(--primary)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+    background-color: hsl(var(--muted) / 0.3) !important;
+}
+
+.wmde-markdown table {
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown th,
+.wmde-markdown td {
+    border-color: hsl(var(--border)) !important;
+}
+
+.wmde-markdown th {
+    background-color: hsl(var(--muted)) !important;
+}
+
+.wmde-markdown a {
+    color: hsl(var(--primary)) !important;
+}
+
+.wmde-markdown a:hover {
+    color: hsl(var(--primary) / 0.8) !important;
+}
+
+/* Horizontal rule */
+.wmde-markdown hr {
+    border-color: hsl(var(--border)) !important;
+}
+
+/* Markdown rendered in comments (prose class) */
+.prose {
+    color: hsl(var(--foreground)) !important;
+    max-width: none !important;
+}
+
+.prose code {
+    background-color: hsl(var(--muted)) !important;
+    color: hsl(var(--foreground)) !important;
+    padding: 0.2em 0.4em !important;
+    border-radius: 0.25rem !important;
+    font-size: 0.875em !important;
+}
+
+.prose pre {
+    background-color: hsl(var(--muted)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+}
+
+.prose pre code {
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+
+.prose a {
+    color: hsl(var(--primary)) !important;
+    text-decoration: underline !important;
+}
+
+.prose strong {
+    color: hsl(var(--foreground)) !important;
+    font-weight: 600 !important;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+    color: hsl(var(--foreground)) !important;
+    font-weight: 600 !important;
+}
+
+.prose blockquote {
+    border-left-color: hsl(var(--primary)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+}
+
+.prose img {
+    border-radius: 0.5rem !important;
+    max-width: 100% !important;
+}
+
+.prose table {
+    border-color: hsl(var(--border)) !important;
+}
+
+.prose th,
+.prose td {
+    border-color: hsl(var(--border)) !important;
+}
+
+.prose th {
+    background-color: hsl(var(--muted)) !important;
+}
+
+/* Improve list styling */
+.prose ul,
+.prose ol {
+    color: hsl(var(--foreground)) !important;
+}
+
+.prose li {
+    color: hsl(var(--foreground)) !important;
+}
+
+/* Task list checkboxes */
+.prose input[type="checkbox"] {
+    accent-color: hsl(var(--primary)) !important;
+}

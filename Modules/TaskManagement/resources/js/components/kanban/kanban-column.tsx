@@ -33,16 +33,20 @@ function KanbanColumn({ status, isDraggingColumn = false }: KanbanColumnProps) {
         setNodeRef: setColumnRef,
         transform: columnTransform,
         transition: columnTransition,
+        isOver: isOverColumn,  // Track if hovering over column (for task drops on empty columns)
     } = useSortable({
         id: `column-${status.id}`,
         data: { type: 'column', status },
     });
 
     // Task droppable
-    const { setNodeRef: setDropRef, isOver } = useDroppable({
+    const { setNodeRef: setDropRef, isOver: isOverStatus } = useDroppable({
         id: status.id,
         data: { type: 'status' },
     });
+
+    // Combine hover states - show feedback if hovering over either column or status droppable
+    const isOver = isOverColumn || isOverStatus;
 
     // Merge refs
     const setRefs = useCallback((node: HTMLDivElement | null) => {

@@ -62,7 +62,7 @@ class ProjectController extends Controller
     {
         $project->load([
             'creator',
-            'taskStatuses' => fn($q) => $q->sorted(),
+            'taskStatuses' => fn($q) => $q->withCount(['tasks'])->sorted(),
             'tasks' => fn($q) => $q->with(['status', 'assignedUsers'])->sorted(),
         ]);
 

@@ -27,6 +27,9 @@ class TaskManagementServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        
+        // Register model observers
+        \Modules\TaskManagement\Models\Task::observe(\Modules\TaskManagement\Observers\TaskObserver::class);
     }
 
     /**
