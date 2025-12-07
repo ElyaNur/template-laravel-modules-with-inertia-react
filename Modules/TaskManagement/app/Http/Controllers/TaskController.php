@@ -182,11 +182,20 @@ class TaskController extends Controller
             ->get()
             ->map(fn($activity) => \Modules\TaskManagement\Services\TaskActivityService::formatActivity($activity));
 
+        // Get available tasks for dependency selection (same project, exclude current task)
+        $availableTasks = Task::where('project_id', $task->project_id)
+            ->where('id', '!=', $task->id)
+            ->select('id', 'title', 'task_status_id')
+            ->with('status:id,name,color')
+            ->orderBy('title')
+            ->get();
+
         return Inertia::render('TaskManagement::tasks/show', [
             'task' => $task,
             'taskComments' => $task->comments,
             'taskAttachments' => $task->attachments,
             'activities' => $activities,
+            'availableTasks' => $availableTasks,
         ]);
     }
 

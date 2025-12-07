@@ -25,56 +25,35 @@ import { AlertCircle } from 'lucide-react';
 
 interface AddDependencyModalProps {
     taskId: number;
-    projectId: number;
 }
 
-export function AddDependencyModal({ taskId, projectId }: AddDependencyModalProps) {
+export function AddDependencyModal({ taskId }: AddDependencyModalProps) {
     const [open, setOpen] = useState(false);
-    const [availableTasks, setAvailableTasks] = useState<TaskData[]>([]);
-    const [loading, setLoading] = useState(false);
+    const { availableTasks } = usePage<SharedData & { availableTasks: TaskData[] }>().props;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         depends_on_task_id: '',
         dependency_type: 'finish_to_start' as const,
     });
 
-    const handleOpenChange = async (newOpen: boolean) => {
-        setOpen(newOpen);
-
-        if (newOpen && availableTasks.length === 0) {
-            // Fetch available tasks when opening modal
-            setLoading(true);
-            try {
-                const response = await fetch(
-                    route('task-management.all-tasks.index', { project: projectId })
-                );
-                const result = await response.json();
-
-                // Filter out the current task and tasks that are already dependencies
-                const filtered = result.data.filter((task: TaskData) => task.id !== taskId);
-                setAvailableTasks(filtered);
-            } catch (error) {
-                console.error('Failed to fetch tasks:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(route('task-management.all-tasks.dependencies.store', { task: taskId }), {
+        post(route('task-management.all-tasks.dependencies.store', { id: taskId }), {
             preserveScroll: true,
             onSuccess: () => {
                 setOpen(false);
                 reset();
             },
+            onError: (errors) => {
+                console.error('Dependency creation error:', errors);
+                console.log('Route being called:', route('task-management.all-tasks.dependencies.store', { task: taskId }));
+            },
         });
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                     <Plus className="h-4 w-4 mr-2" />
@@ -103,17 +82,22 @@ export function AddDependencyModal({ taskId, projectId }: AddDependencyModalProp
                             <Select
                                 value={data.depends_on_task_id}
                                 onValueChange={(value) => setData('depends_on_task_id', value)}
-                                disabled={loading}
                             >
                                 <SelectTrigger id="depends_on_task_id">
-                                    <SelectValue placeholder={loading ? "Loading tasks..." : "Select a task"} />
+                                    <SelectValue placeholder="Select a task" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {availableTasks.map((task) => (
-                                        <SelectItem key={task.id} value={task.id.toString()}>
-                                            {task.title}
+                                    {availableTasks && availableTasks.length > 0 ? (
+                                        availableTasks.map((task) => (
+                                            <SelectItem key={task.id} value={task.id.toString()}>
+                                                {task.title}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <SelectItem value="no-tasks" disabled>
+                                            No tasks available
                                         </SelectItem>
-                                    ))}
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>

@@ -31,6 +31,7 @@ class TaskDependencyController extends Controller
      */
     public function store(StoreTaskDependencyRequest $request, Task $task)
     {
+        dd($task);
         $dependency = TaskDependency::create([
             'task_id' => $task->id,
             'depends_on_task_id' => $request->depends_on_task_id,

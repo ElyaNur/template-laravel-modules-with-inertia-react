@@ -195,7 +195,7 @@ const ShowTask = () => {
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-semibold">Dependencies</h3>
-                                <AddDependencyModal taskId={task.id} projectId={task.project_id || 0} />
+                                <AddDependencyModal taskId={task.id} />
                             </div>
                             <DependencyList
                                 taskId={task.id}
@@ -209,7 +209,7 @@ const ShowTask = () => {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle className="text-base">Dependencies</CardTitle>
-                                    <AddDependencyModal taskId={task.id} projectId={task.project_id || 0} />
+                                    <AddDependencyModal taskId={task.id} />
                                 </div>
                             </CardHeader>
                         </Card>
